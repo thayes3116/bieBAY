@@ -1,8 +1,10 @@
 var mysql = require("mysql"),
 	inquirer = require("inquirer"),
 
+	//declare global variables for scope issues
 	addQuantity,
 	addItem,
+	
 // create the connection information for the sql database
 	connection = mysql.createConnection({
 
@@ -11,22 +13,25 @@ var mysql = require("mysql"),
 		user: "root",
 		password: "",
 		database: "bieBay"
-
 });
 
 // connect to the mysql server
 connection.connect(function(err) {
+
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
   managerList();
 });
 //initial manager prompt
 function managerList(){
+
 	inquirer.prompt({
+
 		type: "list",
 		name: "managerPrompt",
 		message: "What would you like to do?",
 		choices: ["View products for sale", "View Low Inventory", "Add To Inventory", "Add New Product","Exit"]
+
 	}).then(function(answer){
 
 		if(answer.managerPrompt === "View products for sale"){
@@ -271,8 +276,10 @@ function addNewProduct(){
 			type: "confirm",
 			name: "auto",
 			message: "Is it/Are they autographed?"
-		}	
+		}
+
 	]).then(function(answer){
+
 		//Check validity of user input
 		if(answer.product === "" || answer.price <= 0 || parseInt(answer.stock) <= 0){
 
@@ -287,39 +294,50 @@ function addNewProduct(){
 				type: "confirm",
 				name: "confirm",
 				message: "You are about to add this item to your inventory\nProduct Name: "+answer.product+"\nDepartment: "+answer.department+"\nPrice: "+answer.price+"\nStock Quantity: "+answer.stock+"\nAutographed: "+answer.auto+"\nContinue entering item?"
-			}).then(function(answer){
-
-				if(answer.confirm === false){
+			}).then(function(ans){
+				
+				if(ans.confirm === false){
 
 					console.log("Inventory addition canceled");
 					managerList();
 
-				}else if(answer.confirm === true){
+				}else if(ans.confirm === true){
+					console.log(answer.product);
+					console.log(answer.department);
+					console.log(answer.price);
+					console.log(answer.stock);
+					console.log(answer.auto);
+					connection.query("INSERT INTO `products`(`product_name`, `department_name`, `price`, `stock_quantity`, `autographed`) VALUES (?, ?, ?, ?, ?);", [answer.product, answer.department, answer.price, answer.stock, answer.auto], function(err){
+		
+						if (err) throw err
 
-					console.log("Your addition was processed");
 
-					inquirer.prompt({
-					type: "list",
-					name: "managerPrompt",
-					message: "What would you like to do?",
-					choices: ["Add another Product", "View products for sale", "View Low Inventory", "Add To Inventory", "Return to Main Menu", "Exit"]
+						console.log("Your addition was processed");
 
-					}).then(function(answer){
+						inquirer.prompt({
 
-						if(answer.managerPrompt === "Add another Product"){
-							addNewProduct();
-						}else if(answer.managerPrompt === "View products for sale"){
-							viewProducts();
-						}else if(answer.managerPrompt === "View Low Inventory"){
-							viewLowInventory();
-						}else if(answer.managerPrompt === "Add To Inventory"){
-							addToInventory();
-						}else if(answer.managerPrompt === "Return to Main Menu"){
-							managerList();
-						}else if(answer.managerPrompt === "Exit"){
-							exit();
-						}
-					});
+							type: "list",
+							name: "managerPrompt",
+							message: "What would you like to do?",
+							choices: ["Add another Product", "View products for sale", "View Low Inventory", "Add To Inventory", "Return to Main Menu", "Exit"]
+
+						}).then(function(answer){
+
+							if(answer.managerPrompt === "Add another Product"){
+								addNewProduct();
+							}else if(answer.managerPrompt === "View products for sale"){
+								viewProducts();
+							}else if(answer.managerPrompt === "View Low Inventory"){
+								viewLowInventory();
+							}else if(answer.managerPrompt === "Add To Inventory"){
+								addToInventory();
+							}else if(answer.managerPrompt === "Return to Main Menu"){
+								managerList();
+							}else if(answer.managerPrompt === "Exit"){
+								exit();
+							}
+						});
+					});	
 				}
 			});				
 		}

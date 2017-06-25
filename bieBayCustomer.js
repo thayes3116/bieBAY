@@ -1,6 +1,7 @@
 var mysql = require("mysql"),
 	inquirer = require("inquirer"),
 
+	//declare global variables for scope issues
 	customerItem,
 	customerQuantity,
 	remainingStock,
@@ -42,7 +43,7 @@ function customerPrompt() {
     	{
     		type: "input",
     		name: "ID",
-    		message: "Please enter item ID",
+    		message: "Please enter item ID of the product you wish to purchase",
     		validate: function(value) {
 	          	if (isNaN(value) === false) {
 	          		return true;
