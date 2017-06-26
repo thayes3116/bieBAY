@@ -1,9 +1,10 @@
+//set npm requirements
 var mysql = require("mysql"),
 	inquirer = require("inquirer"),
 	Table = require('cli-table'),
 
-	table,
 	tableColumns = ['department_id', 'department_name', 'over_head_costs', 'product_sales', 'total_profit'],
+
 // create the connection information for the sql database
 	connection = mysql.createConnection({
 
@@ -21,7 +22,7 @@ connection.connect(function(err) {
   // run the start function after the connection is made to prompt the user
   supervisorList();
 });
-
+//supervisor navigation function
 function supervisorList(){
 
 	inquirer.prompt({
@@ -41,13 +42,13 @@ function supervisorList(){
 	});
 }
 
-
+//function to view sales by department
 function viewSales(){
-
+	//query departemtns table and add alias column total profit
 	connection.query("SELECT *, (product_sales - over_head_costs) AS total_profit FROM `departments`;", function(err, results){
 
 		if (err) throw err;
-		
+		//creat tabel for friendly display
 		var table = new Table({
 		    head: tableColumns, 
 		    colWidths: [20, 20, 20, 20, 20]
@@ -68,12 +69,13 @@ function viewSales(){
 		}
 
 		console.log(table.toString());
+
 		supervisorList();
 	});
 
 	
 }
-
+//function to new department
 function createDepartment(){
 	
 	inquirer.prompt([
@@ -105,11 +107,11 @@ function createDepartment(){
         }
 	}
 	]).then(function(answer){
-
+		//make sure department doen't already exist
 		connection.query("SELECT 1 FROM `products` WHERE `department_name` = ?", [answer.department_name], function(err, results){
 			
 			if (err) throw err
-
+			//make sure user input is valid
 			if(answer.sales < 0 || answer.costs < 0 || results[0] == 1){
 
 				console.log("Please enter a new department name with a cost and current sales >= 0");
@@ -117,7 +119,7 @@ function createDepartment(){
 				createDepartment();
 
 			}else{
-
+				//check to make sure info is correct
 				inquirer.prompt({
 				
 				type: "confirm",
@@ -132,7 +134,7 @@ function createDepartment(){
 						supervisorList();
 
 					}else if(ans.confirm === true){
-
+						//add department in sql
 						connection.query("INSERT INTO `departments`(`department_name`, `over_head_costs`, `product_sales`) VALUES (?, ?, ?);", [answer.department_name, answer.costs, answer.sales], function(err){
 			
 							if (err) throw err

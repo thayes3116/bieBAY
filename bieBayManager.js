@@ -1,5 +1,7 @@
+//set npm requirements
 var mysql = require("mysql"),
 	inquirer = require("inquirer"),
+	Table = require('cli-table'),
 
 	//declare global variables for scope issues
 	addQuantity,
@@ -24,7 +26,7 @@ connection.connect(function(err) {
 });
 //initial manager prompt
 function managerList(){
-
+	//navigation
 	inquirer.prompt({
 
 		type: "list",
@@ -49,34 +51,66 @@ function managerList(){
 }
 //function to view products
 function viewProducts(){
-	//search for table of available items and display
-	connection.query("SELECT * FROM `products`", function(err, results){
+
+	//query products' columns' names
+	connection.query("SHOW COLUMNS FROM `products`", function(err, columns){
 
 		if (err) throw err;
 
-		console.log(results);
+		var tableColumns = [];
+		//create an array of column names
+		for( var i = 0 ; i < columns.length ; i ++){
+			tableColumns.push(columns[i].Field);
+		}
+	
+		//search for table of available items
+		connection.query("SELECT * FROM `products`", function(err, results){
 
-		inquirer.prompt({
+			if (err) throw err;
+			//create a table
+			var table = new Table({
+		    head: tableColumns, 
+		    colWidths: [10, 40, 20, 10, 20, 15]
+			});
+			
+			for(var i = 0 ; i < results.length ; i ++){
 
-			type: "list",
-			name: "managerPrompt",
-			message: "What would you like to do?",
-			choices: ["View Low Inventory", "Add To Inventory", "Add New Product", "Return to Main Menu", "Exit"]
+				var tempArray = [];
+			
+			for(var j = 0 ; j < tableColumns.length ; j ++){
 
-		}).then(function(answer){
+				tempArray.push(results[i][tableColumns[j]]);
 
-			if(answer.managerPrompt === "View Low Inventory"){
-				viewLowInventory();
-			}else if(answer.managerPrompt === "Add To Inventory"){
-				addToInventory();
-			}else if(answer.managerPrompt === "Add New Product"){
-				addNewProduct();
-			}else if(answer.managerPrompt === "Return to Main Menu"){
-				managerList();
-			}else if(answer.managerPrompt === "Exit"){
-				exit();
 			}
 
+				table.push(tempArray);
+			
+			}
+
+				console.log(table.toString());
+
+			//navigation
+			inquirer.prompt({
+
+				type: "list",
+				name: "managerPrompt",
+				message: "What would you like to do?",
+				choices: ["View Low Inventory", "Add To Inventory", "Add New Product", "Return to Main Menu", "Exit"]
+
+			}).then(function(answer){
+
+				if(answer.managerPrompt === "View Low Inventory"){
+					viewLowInventory();
+				}else if(answer.managerPrompt === "Add To Inventory"){
+					addToInventory();
+				}else if(answer.managerPrompt === "Add New Product"){
+					addNewProduct();
+				}else if(answer.managerPrompt === "Return to Main Menu"){
+					managerList();
+				}else if(answer.managerPrompt === "Exit"){
+					exit();
+				}
+			});
 		});
 	});
 }
@@ -105,7 +139,7 @@ function viewLowInventory(){
 
 				console.log("No reorder is scheduled at this time");
 			}
-				
+			//navigation	
 			inquirer.prompt({
 				type: "list",
 				name: "managerPrompt",
@@ -202,7 +236,8 @@ function addToInventory(){
 									if (err) throw err
 									//provide summary of action to user
 									console.log("You have added "+addQuantity+" of item ID# "+addItem+" to the inventory. You now have "+after[0].stock_quantity+" in stock.");
-								
+
+									//navigation
 									inquirer.prompt({
 										type: "list",
 										name: "managerPrompt",
@@ -299,16 +334,17 @@ function addNewProduct(){
 				if(ans.confirm === false){
 
 					console.log("Inventory addition canceled");
+
 					managerList();
 
 				}else if(ans.confirm === true){
-				
+					//insert priduct info into sql
 					connection.query("INSERT INTO `products`(`product_name`, `department_name`, `price`, `stock_quantity`, `autographed`) VALUES (?, ?, ?, ?, ?);", [answer.product, answer.department, answer.price, answer.stock, answer.auto], function(err){
 		
 						if (err) throw err
 
 						console.log("Your addition was processed");
-
+						//navigation
 						inquirer.prompt({
 
 							type: "list",

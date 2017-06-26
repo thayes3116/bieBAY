@@ -1,3 +1,4 @@
+//set npm requirements
 var mysql = require("mysql"),
 	inquirer = require("inquirer"),
 	Table = require('cli-table'),
@@ -27,21 +28,22 @@ connection.connect(function(err) {
 
 //function to start
 function start(){
+	//query products' columns' names
 	connection.query("SHOW COLUMNS FROM `products`", function(err, columns){
 
 		if (err) throw err;
 
 		var tableColumns = [];
-
+		//create an array of column names
 		for( var i = 0 ; i < columns.length ; i ++){
 			tableColumns.push(columns[i].Field);
 		}
 	
-		//search for table of available items and display
+		//search for table of available items
 		connection.query("SELECT * FROM `products`", function(err, results){
 
 			if (err) throw err;
-
+			//create a table
 			var table = new Table({
 		    head: tableColumns, 
 		    colWidths: [10, 40, 20, 10, 20, 15]
@@ -152,16 +154,16 @@ function completeSale(){
 	    		if (answer.confirm === true){
 
 	    			console.log("Congratulations, your order will be shipped. If you are not a teenage girl, you need to take a look at your life.");
-
+	    			//update stock quantity
 	    			connection.query("UPDATE `products` SET `stock_quantity`= ? WHERE `item_id` = ?;",[results[0].stock_quantity-customerQuantity, customerItem],  function(err){
 					
 
 						if (err) throw err;	
-
+						//query for all data from both tables for item number and its department
 						connection.query("SELECT * FROM `departments`, `products` WHERE `products`.`item_id` = ? AND `products`.`department_name` = `departments`.`department_name`", [customerItem], function(err, sales){
 
 							if (err) throw err;
-
+							//update product sales
 							connection.query("UPDATE `departments`,`products` SET `departments`.`product_sales`= ? WHERE `products`.`department_name` = `departments`.`department_name` AND `products`.`item_id` = ?;",[sales[0].product_sales+customerQuantity*results[0].price, customerItem],  function(err){
 
 								if (err) throw err;
