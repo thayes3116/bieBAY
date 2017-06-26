@@ -107,12 +107,13 @@ function createDepartment(){
         }
 	}
 	]).then(function(answer){
+		
 		//make sure department doen't already exist
 		connection.query("SELECT 1 FROM `products` WHERE `department_name` = ?", [answer.department_name], function(err, results){
 			
 			if (err) throw err
 			//make sure user input is valid
-			if(answer.sales < 0 || answer.costs < 0 || results[0] == 1){
+			if(answer.department_name == false || answer.sales < 0 || answer.costs < 0 || results[0] !== undefined){
 
 				console.log("Please enter a new department name with a cost and current sales >= 0");
 
