@@ -118,50 +118,81 @@ function viewProducts(){
 //function to view low inventory
 function viewLowInventory(){
 
-	//search for table of available items and display items low in stock
-	connection.query("SELECT `item_id`, `product_name`, `stock_quantity` FROM `products` WHERE stock_quantity < 20;", function(err, results){
+	//query products' columns' names
+	connection.query("SHOW COLUMNS FROM `products`", function(err, columns){
 
 		if (err) throw err;
 
-		console.log(results);
-		//offer reorder
-		inquirer.prompt({
-			type: "confirm",
-			name: "confirm",
-			message: "Would you like to order more of an item?"
-		}).then(function(answer){
+		var tableColumns = [];
+		//create an array of column names
+		for( var i = 0 ; i < columns.length ; i ++){
+			tableColumns.push(columns[i].Field);
+		}
+		//search for table of available items and display items low in stock
+		connection.query("SELECT * FROM `products` WHERE stock_quantity < 20;", function(err, results){
 
-			if (answer.confirm === true){
+			if (err) throw err;
 
-				console.log("In the future, this will fire a function to assist with the reorder process")
+			var table = new Table({
+			    head: tableColumns, 
+			    colWidths: [10, 20, 20, 10, 20, 15]
+				});
+				
+				for(var i = 0 ; i < results.length ; i ++){
 
-			}else if(answer.confirm === false){
+					var tempArray = [];
+				
+				for(var j = 0 ; j < tableColumns.length ; j ++){
 
-				console.log("No reorder is scheduled at this time");
-			}
-			//navigation	
+					tempArray.push(results[i][tableColumns[j]]);
+
+				}
+
+					table.push(tempArray);
+				
+				}
+
+					console.log(table.toString());
+			//console.log(table);
+			//offer reorder
 			inquirer.prompt({
-				type: "list",
-				name: "managerPrompt",
-				message: "What would you like to do?",
-				choices: ["View products for sale", "Add To Inventory", "Add New Product", "Return to Main Menu", "Exit"]
-
+				type: "confirm",
+				name: "confirm",
+				message: "Would you like to order more of an item?"
 			}).then(function(answer){
 
-				if(answer.managerPrompt === "View products for sale"){
-					viewProducts();
-				}else if(answer.managerPrompt === "Add To Inventory"){
-					addToInventory();
-				}else if(answer.managerPrompt === "Add New Product"){
-					addNewProduct();
-				}else if(answer.managerPrompt === "Return to Main Menu"){
-					managerList();
-				}else if(answer.managerPrompt === "Exit"){
-					exit();
+				if (answer.confirm === true){
+
+					console.log("In the future, this will fire a function to assist with the reorder process")
+
+				}else if(answer.confirm === false){
+
+					console.log("No reorder is scheduled at this time");
 				}
+				//navigation	
+				inquirer.prompt({
+					type: "list",
+					name: "managerPrompt",
+					message: "What would you like to do?",
+					choices: ["View products for sale", "Add To Inventory", "Add New Product", "Return to Main Menu", "Exit"]
+
+				}).then(function(answer){
+
+					if(answer.managerPrompt === "View products for sale"){
+						viewProducts();
+					}else if(answer.managerPrompt === "Add To Inventory"){
+						addToInventory();
+					}else if(answer.managerPrompt === "Add New Product"){
+						addNewProduct();
+					}else if(answer.managerPrompt === "Return to Main Menu"){
+						managerList();
+					}else if(answer.managerPrompt === "Exit"){
+						exit();
+					}
+				});
 			});
 		});
-	});
+	});	
 }
 
 //function to add to inventory
