@@ -302,15 +302,10 @@ function addNewProduct(){
 					managerList();
 
 				}else if(ans.confirm === true){
-					console.log(answer.product);
-					console.log(answer.department);
-					console.log(answer.price);
-					console.log(answer.stock);
-					console.log(answer.auto);
+				
 					connection.query("INSERT INTO `products`(`product_name`, `department_name`, `price`, `stock_quantity`, `autographed`) VALUES (?, ?, ?, ?, ?);", [answer.product, answer.department, answer.price, answer.stock, answer.auto], function(err){
 		
 						if (err) throw err
-
 
 						console.log("Your addition was processed");
 

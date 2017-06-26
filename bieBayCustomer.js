@@ -1,5 +1,6 @@
 var mysql = require("mysql"),
 	inquirer = require("inquirer"),
+	Table = require('cli-table'),
 
 	//declare global variables for scope issues
 	customerItem,
@@ -26,14 +27,45 @@ connection.connect(function(err) {
 
 //function to start
 function start(){
-	//search for table of available items and display
-	connection.query("SELECT * FROM `products`", function(err, results){
+	connection.query("SHOW COLUMNS FROM `products`", function(err, columns){
 
 		if (err) throw err;
 
-		console.log(results);
-		customerPrompt();
+		var tableColumns = [];
 
+		for( var i = 0 ; i < columns.length ; i ++){
+			tableColumns.push(columns[i].Field);
+		}
+	
+		//search for table of available items and display
+		connection.query("SELECT * FROM `products`", function(err, results){
+
+			if (err) throw err;
+
+			var table = new Table({
+		    head: tableColumns, 
+		    colWidths: [10, 40, 20, 10, 20, 15]
+			});
+			
+			for(var i = 0 ; i < results.length ; i ++){
+
+				var tempArray = [];
+			
+			for(var j = 0 ; j < tableColumns.length ; j ++){
+
+				tempArray.push(results[i][tableColumns[j]]);
+
+			}
+
+				table.push(tempArray);
+			
+			}
+
+				console.log(table.toString());
+
+			customerPrompt();
+
+		});
 	});
 }
 //function for customer to choose item and quantity
@@ -122,8 +154,19 @@ function completeSale(){
 	    			console.log("Congratulations, your order will be shipped. If you are not a teenage girl, you need to take a look at your life.");
 
 	    			connection.query("UPDATE `products` SET `stock_quantity`= ? WHERE `item_id` = ?;",[results[0].stock_quantity-customerQuantity, customerItem],  function(err){
-		
+					
+
 						if (err) throw err;	
+
+						connection.query("SELECT * FROM `departments`, `products` WHERE `products`.`item_id` = ? AND `products`.`department_name` = `departments`.`department_name`", [customerItem], function(err, sales){
+
+							if (err) throw err;
+
+							connection.query("UPDATE `departments`,`products` SET `departments`.`product_sales`= ? WHERE `products`.`department_name` = `departments`.`department_name` AND `products`.`item_id` = ?;",[sales[0].product_sales+customerQuantity*results[0].price, customerItem],  function(err){
+
+								if (err) throw err;
+							});	
+						});
 
 		    		});
 	    		//restart if customer doesn't confirm
