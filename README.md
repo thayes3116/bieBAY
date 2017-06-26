@@ -11,4 +11,4 @@ This is the table of the current products for sale from the database.
 ![](/Images_for_Read_Me/CustomerCompletedSale.png)
 After the transaction is completed, the inventory is updated and the product sales are updated in deparments tables.
 Here is a link to watch the customer view demo
-![](/Images_for_Read_Me/CustomerProductTable2.png)
+![](customer demo.mov)
