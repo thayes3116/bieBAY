@@ -10,13 +10,11 @@ Command line command to run app with customer view
 This is the table of the current products for sale from the database.
 ![](/Images_for_Read_Me/CustomerCompletedSale.png)
 After the transaction is completed, the inventory is updated and the product sales are updated in deparments tables.
-Look for this link to watch the customer view demo video in this repo
- file name is "customer demo.mov"
- 
+
  MANAGER VIEW
  Command line command to run app with customer view
 "node biebayManager.js"
-This the opening view for the manager
+This is the opening view for the manager
 ![](/Images_for_Read_Me/ManagerOpening.png)
 The current products for sale looks the same as the customer view
 ![](/Images_for_Read_Me/lowinventory.png)
@@ -25,8 +23,7 @@ View to view low inventory and reorder
 View to add inventory
 ![](/Images_for_Read_Me/addnewitem.png)
 View to add new item
-Look for this link to watch the customer view demo video in this repo
- file name is "manager demo video"
+
 
 SUPERVISOR VIEW
 Command line command to run app with customer view
@@ -35,5 +32,6 @@ This is the view for sales by department
 ![](/Images_for_Read_Me/SupervisorDeprtments.png)
 This is the view for adding a department
 ![](/Images_for_Read_Me/AddDepartment.png)
-Look for this link to watch the customer view demo video in this repo
- file name is "supervisor demo video"
+
+Demonstration Video can be found at:
+https://www.youtube.com/watch?v=4vECJ162pCE&feature=youtu.be
